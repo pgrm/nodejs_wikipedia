@@ -1,0 +1,96 @@
+{
+  "mediawiki": {
+    "_count": 1,
+    "xmlns": 1,
+    "xmlns:xsi": 1,
+    "xsi:schemaLocation": 1,
+    "version": 1,
+    "xml:lang": 1,
+    "siteinfo": {
+      "_count": 1,
+      "sitename": {
+        "_count": 1
+      },
+      "base": {
+        "_count": 1
+      },
+      "generator": {
+        "_count": 1
+      },
+      "case": {
+        "_count": 1
+      },
+      "namespaces": {
+        "_count": 1,
+        "namespace": {
+          "_count": 22,
+          "key": 22,
+          "case": 22
+        }
+      }
+    },
+    "page": {
+      "_count": 319211,
+      "title": {
+        "_count": 319211
+      },
+      "ns": {
+        "_count": 319211
+      },
+      "id": {
+        "_count": 319211
+      },
+      "restrictions": {
+        "_count": 10
+      },
+      "revision": {
+        "_count": 319211,
+        "id": {
+          "_count": 319211
+        },
+        "parentid": {
+          "_count": 257205
+        },
+        "timestamp": {
+          "_count": 319211
+        },
+        "contributor": {
+          "_count": 319211,
+          "username": {
+            "_count": 314856
+          },
+          "id": {
+            "_count": 314856
+          },
+          "ip": {
+            "_count": 4354
+          },
+          "deleted": 1
+        },
+        "minor": {
+          "_count": 231210
+        },
+        "comment": {
+          "_count": 304878
+        },
+        "text": {
+          "_count": 319211,
+          "xml:space": 319211
+        },
+        "sha1": {
+          "_count": 319211
+        },
+        "model": {
+          "_count": 319211
+        },
+        "format": {
+          "_count": 319211
+        }
+      },
+      "redirect": {
+        "_count": 56088,
+        "title": 56088
+      }
+    }
+  }
+}

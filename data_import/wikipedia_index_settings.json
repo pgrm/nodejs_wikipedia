@@ -1,0 +1,65 @@
+{
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas" : 1
+    },
+    "mappings": {
+        "page": {
+            "_id": {
+                "path": "title"
+            },
+            "_timpestamp": {
+                "enabled": true,
+                "path": "timpestamp"
+            },
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "store": "yes",
+                    "index": "analyzed",
+                    "boost": 5.0
+                },
+                "text": {
+                    "type": "string",
+                    "store": "yes",
+                    "index": "analyzed"
+                },
+                "html": {
+                    "type": "string",
+                    "store": "no",
+                    "index": "no"
+                },
+                "redirect_to": {
+                    "type": "string",
+                    "store": "no",
+                    "index": "no"
+                },
+                "type": {
+                    "type": "string",
+                    "store": "yes",
+                    "index": "not_analyzed"
+                },
+                "timestamp": {
+                    "type": "date",
+                    "format": "date_time_no_millis",
+                    "index": "no"
+                },
+                "comment": {
+                    "type": "string",
+                    "store": "no",
+                    "index": "no"
+                },
+                "contributor_name": {
+                    "type": "string",
+                    "store": "yes",
+                    "index": "analyzed"
+                },
+                "contributor_ip": {
+                    "type": "string",
+                    "store": "yes",
+                    "index": "not_analyzed"
+                }
+            }
+        }
+    }
+}
