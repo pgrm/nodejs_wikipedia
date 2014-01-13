@@ -2,116 +2,6 @@
 (function() {
   var Throttle, XmlPath, cacheHtml, currentNamespaceId, currentPage, fs, http, inInitMode, indexName, namespaces, pageCount, sax, saxStream, saxStreamFinished, saxStreamOptions, storePage, strict, throttle, wikijs, wikipediaDataPath, xmlPath;
 
-  XmlPath = (function() {
-    function XmlPath() {}
-
-    XmlPath.prototype.currentPath = [];
-
-    XmlPath.prototype.push = function(item) {
-      return this.currentPath.push(item);
-    };
-
-    XmlPath.prototype.pop = function() {
-      return this.currentPath.pop();
-    };
-
-    XmlPath.prototype.peek = function() {
-      return this.currentPath[this.currentPath.length - 1];
-    };
-
-    XmlPath.prototype.isEmpty = function() {
-      return this.currentPath.length === 0;
-    };
-
-    XmlPath.prototype.startsWith = function(subPath) {
-      return this.startsWith(this.currentPath, subPath);
-    };
-
-    XmlPath.prototype.startsWith = function(path, subPath) {
-      var i, _i, _ref;
-      for (i = _i = 0, _ref = subPath.length; _i < _ref; i = _i += 1) {
-        if (subPath[i] !== path[i]) {
-          return false;
-        }
-      }
-      return true;
-    };
-
-    XmlPath.prototype.endsWith = function(subPath) {
-      return this.startsWith(path.reverse(), subPath.reverse());
-    };
-
-    XmlPath.prototype.applyForStatsToObject = function(item, attributes) {
-      var k, part, v, _i, _len, _ref, _results;
-      _ref = this.currentPath;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        part = _ref[_i];
-        if (item[part] === void 0) {
-          item[part] = {
-            _count: 0
-          };
-        }
-        item = item[part];
-      }
-      item['_count']++;
-      _results = [];
-      for (k in attributes) {
-        v = attributes[k];
-        if (item[k] === void 0) {
-          _results.push(item[k] = 0);
-        } else {
-          _results.push(item[k]++);
-        }
-      }
-      return _results;
-    };
-
-    XmlPath.prototype.toString = function() {
-      return this.currentPath.toString();
-    };
-
-    return XmlPath;
-
-  })();
-
-  fs = require('fs');
-
-  sax = require('sax');
-
-  http = require('http');
-
-  wikijs = require('wiky.js');
-
-  Throttle = require('throttle');
-
-  throttle = new Throttle(768 * 1024);
-
-  cacheHtml = true;
-
-  if (cacheHtml) {
-    indexName = 'wikipedia_cached';
-  } else {
-    indexName = 'wikipedia';
-  }
-
-  xmlPath = new XmlPath;
-
-  wikipediaDataPath = '/home/peter/host/Dropbox/Bachelor/Wikipedia_rawData/skwiki-20130923-pages-articles.xml';
-
-  pageCount = 0;
-
-  wikijs.options['link-image'] = false;
-
-  strict = true;
-
-  saxStreamOptions = {
-    trim: true,
-    normalize: true,
-    lowercase: true
-  };
-
-  saxStream = sax.createStream(strict, saxStreamOptions);
-
   saxStreamFinished = function() {
     return console.log('FINISHED');
   };
@@ -150,6 +40,46 @@
     req.write(JSON.stringify(page));
     return req.end();
   };
+
+  fs = require('fs');
+
+  sax = require('sax');
+
+  http = require('http');
+
+  wikijs = require('wiky.js');
+
+  Throttle = require('throttle');
+
+  XmlPath = require('./XmlPath');
+
+  throttle = new Throttle(768 * 1024);
+
+  cacheHtml = true;
+
+  if (cacheHtml) {
+    indexName = 'wikipedia_cached';
+  } else {
+    indexName = 'wikipedia';
+  }
+
+  xmlPath = new XmlPath;
+
+  wikipediaDataPath = '/home/peter/host/Dropbox/Bachelor/Wikipedia_rawData/skwiki-20130923-pages-articles.xml';
+
+  pageCount = 0;
+
+  wikijs.options['link-image'] = false;
+
+  strict = true;
+
+  saxStreamOptions = {
+    trim: true,
+    normalize: true,
+    lowercase: true
+  };
+
+  saxStream = sax.createStream(strict, saxStreamOptions);
 
   inInitMode = true;
 

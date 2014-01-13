@@ -1,55 +1,44 @@
-class XmlPath
-    currentPath: []
+saxStreamFinished = ->
+    #console.log('%j', xmlStats)
+    console.log('FINISHED')
 
-    push: (item) ->
-        @currentPath.push(item)
+storePage = (page) ->
+    title = page['title']
 
-    pop: ->
-        @currentPath.pop()
+    if cacheHtml && page['text'] != undefined
+        page['html'] = wikijs.process(page['text'])
 
-    peek: ->
-        @currentPath[@currentPath.length - 1]
+    options =
+        host: 'localhost'
+        port: 9200
+        path: "/#{indexName}/page/" + encodeURIComponent(page['title'])
+        method: 'PUT'
 
-    isEmpty: ->
-        @currentPath.length == 0
+    req = http.request(options, (res) ->
+        shouldLog = false
+        if res.statusCode != 201
+            shouldLog = true
 
-    startsWith: (subPath) ->
-        @startsWith(@currentPath, subPath)
-
-    startsWith: (path, subPath) ->
-        for i in [0...subPath.length] by 1
-            if subPath[i] != path[i]
-                return false
-        true
-
-    endsWith: (subPath) ->
-        @startsWith(path.reverse(), subPath.reverse())
-
-    applyForStatsToObject: (item, attributes) ->
-        for part in @currentPath
-            if item[part] == undefined
-                item[part] =
-                    _count: 0
-
-            item = item[part]
-
-        item['_count']++
-
-        for k, v of attributes
-            if item[k] == undefined
-                item[k] = 0
-            else
-                item[k]++
-
-    toString: ->
-        @currentPath.toString()
-#end XmlPath
+        if shouldLog
+            console.log('PAGE: ' + page['title'])
+            console.log('HEADERS: ' + JSON.stringify(res.headers))
+        res.on('data', (chunk) ->
+            if shouldLog
+                console.log('BODY: ' + chunk)
+        )
+    )
+    req.on('error', (e) ->
+        console.log("problem with request #{title}: " + e.message)
+    )
+    req.write(JSON.stringify(page))
+    req.end()
 
 fs = require('fs')
 sax = require('sax')
 http = require('http')
 wikijs = require('wiky.js')
 Throttle = require('throttle')
+XmlPath = require ('./XmlPath')
 throttle = new Throttle(768 * 1024)
 
 cacheHtml = true
@@ -71,39 +60,6 @@ saxStreamOptions =
 
 #xmlStats = {}
 saxStream = sax.createStream(strict, saxStreamOptions)
-
-saxStreamFinished = ->
-    #console.log('%j', xmlStats)
-    console.log('FINISHED')
-
-storePage = (page) ->
-    title = page['title']
-
-    if cacheHtml && page['text'] != undefined
-        page['html'] = wikijs.process(page['text'])
-    options =
-        host: 'localhost'
-        port: 9200
-        path: "/#{indexName}/page/" + encodeURIComponent(page['title'])
-        method: 'PUT'
-    req = http.request(options, (res) ->
-        shouldLog = false
-        if res.statusCode != 201
-            shouldLog = true
-
-        if shouldLog
-            console.log('PAGE: ' + page['title'])
-            console.log('HEADERS: ' + JSON.stringify(res.headers))
-        res.on('data', (chunk) ->
-            if shouldLog
-                console.log('BODY: ' + chunk)
-        )
-    )
-    req.on('error', (e) ->
-        console.log("problem with request #{title}: " + e.message)
-    )
-    req.write(JSON.stringify(page))
-    req.end()
 
 inInitMode = true
 currentNamespaceId = undefined
