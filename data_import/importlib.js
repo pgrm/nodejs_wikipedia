@@ -65,7 +65,7 @@
 
   xmlPath = new XmlPath;
 
-  wikipediaDataPath = '/home/peter/host/Dropbox/Bachelor/Wikipedia_rawData/skwiki-20130923-pages-articles.xml';
+  wikipediaDataPath = process.argv[2];
 
   pageCount = 0;
 
