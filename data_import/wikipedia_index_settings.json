@@ -58,6 +58,10 @@
                     "type": "string",
                     "store": "yes",
                     "index": "not_analyzed"
+                },
+                "view_count": {
+                    "type": "integer",
+                    "null_value": "0"
                 }
             }
         }
