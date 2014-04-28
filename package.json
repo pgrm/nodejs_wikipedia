@@ -8,6 +8,6 @@
         "hbs": "*",
         "sax": "*",
         "wiky.js": "*",
-        "throttle": "*"
+        "throttle": "*",
     }
 }

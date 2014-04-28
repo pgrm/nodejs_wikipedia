@@ -2,16 +2,49 @@ saxStreamFinished = ->
     #console.log('%j', xmlStats)
     console.log('FINISHED')
 
-storePage = (page) ->
-    title = page['title']
+#parseWikiText = (page) ->
+#    page['html'] = ''
+#    parsoid = spawn('nodejs', ['../parsoid/tests/parse', '--wt2html'])
+#    parsoid.stdout.on('data', (data) ->
+#        page['html'] += data
+#    )
+#    parsoid.stderr.on('data', (data) ->
+#        console.log("Error: " + data)
+#    )
+#    parsoid.on('close', () ->
+#        runningConcurrentTransformations--
+#        storePageToES(page)
+#
+#        while (runningConcurrentTransformations < maxConcurrentTransformations)
+#            nextPage = pageQueue.shift()
+#            if (nextPage != undefined )
+#                storePage(nextPage)
+#            else
+#                break
+#    )
+#    parsoid.stdin.end(page['text'])
+#
+#storePage = (page) ->
+#    if cacheHtml && page['text'] != undefined
+#        page['html'] = wikijs.process(page['text'])
+#
+#        if (runningConcurrentTransformations > maxConcurrentTransformations)
+#            pageQueue.push(page)
+#        else
+#            runningConcurrentTransformations++
+#            parseWikiText(page)
+#    else
+#        storePageToES(page)
 
+storePageToES = (page) ->
     if cacheHtml && page['text'] != undefined
         page['html'] = wikijs.process(page['text'])
 
+    title = page['title']
     options =
         host: 'localhost'
         port: 9200
-        path: "/#{indexName}/page/" + encodeURIComponent(page['title'])
+        path: "/#{indexName}/page/" + encodeURIComponent(title)
         method: 'PUT'
 
     req = http.request(options, (res) ->
@@ -20,11 +53,14 @@ storePage = (page) ->
             shouldLog = true
 
         if shouldLog
-            console.log('PAGE: ' + page['title'])
+            console.log("PAGE: #{title}")
             console.log('HEADERS: ' + JSON.stringify(res.headers))
         res.on('data', (chunk) ->
             if shouldLog
                 console.log('BODY: ' + chunk)
+        )
+        res.on('error', (e) ->
+            console.log("problem with the response #{title}: " + e.message)
         )
     )
     req.on('error', (e) ->
@@ -39,9 +75,13 @@ http = require('http')
 wikijs = require('wiky.js')
 Throttle = require('throttle')
 XmlPath = require ('./XmlPath')
-throttle = new Throttle(768 * 1024)
+#spawn = require('child_process').spawn
 
-cacheHtml = true
+maxConcurrentTransformations = 48
+runningConcurrentTransformations = 0
+pageQueue = []
+throttle = new Throttle(128 * 1024)
+cacheHtml = false
 
 if cacheHtml
     indexName = 'wikipedia_cached'
@@ -59,7 +99,6 @@ saxStreamOptions =
     normalize: true
     lowercase: true
 
-#xmlStats = {}
 saxStream = sax.createStream(strict, saxStreamOptions)
 
 inInitMode = true
@@ -74,10 +113,9 @@ saxStream.onopentag = (node) ->
         if node.name == 'namespace'
             currentNamespaceId = node.attributes['key']
     else if node.name == 'page'
-        currentPage = {}
+        currentPage = {'view_count': 0}
     else if node.name == 'redirect'
         currentPage['redirect_to'] = node.attributes['title']
-    #xmlPath.applyForStatsToObject(xmlStats, node.attributes)
 
 saxStream.ontext = (text) ->
     if currentNamespaceId != undefined
@@ -99,7 +137,7 @@ saxStream.onclosetag = (nodeName) ->
             inInitMode = false
             currentNamespaceId = undefined
     else if nodeName == 'page'
-        storePage(currentPage)
+        storePageToES(currentPage)
         pageCount++
         if pageCount % 1000 == 0
             console.log("Finished #{pageCount} pages")
